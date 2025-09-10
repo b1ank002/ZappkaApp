@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zappka → ZAPPKA Token Converter</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --border-color: #e5e7eb;
+            --text-color: #374151;
+            --text-light: #6b7280;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-color);
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .step {
+            background: var(--light-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .step:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+        
+        .step-title {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .step-description {
+            color: var(--text-light);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin: 24px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .status {
+            padding: 16px;
+            border-radius: 12px;
+            margin: 24px 0;
+            text-align: center;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .zapp-code {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark-color);
+            margin: 16px 0;
+            word-break: break-all;
+            border: 2px solid var(--border-color);
+        }
+        
+        .instructions {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .instructions h4 {
+            color: #92400e;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .instructions ol {
+            color: #92400e;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .wallet-info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .wallet-address {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            color: var(--info-color);
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+        
+        .zappka-account {
+            background: #f8fafc;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: bold;
+            color: var(--dark-color);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+        
+        .balance-info {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        
+        .balance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .balance-label {
+            font-weight: 600;
+            color: #065f46;
+        }
+        
+        .balance-value {
+            font-family: 'Monaco', 'Menlo', monospace;
+            color: #065f46;
+            font-weight: bold;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .step-completed {
+            border-left-color: var(--success-color);
+            background: #f0fdf4;
+        }
+        
+        .step-completed .step-number {
+            background: var(--success-color);
+        }
+        
+        .step-completed .step-number::after {
+            content: '✓';
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+                margin: 10px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .step {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-shopping-cart"></i>
+                <span>→</span>
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="subtitle">Convert Zappka Zapps to ZAPPKA Tokens</div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        
+        <div id="connectWallet" class="step">
+            <div class="step-title">
+                <span class="step-number">1</span>
+                Connect Your Wallet
+            </div>
+            <div class="step-description">
+                Connect your MetaMask wallet to start the conversion process.
+            </div>
+            <button id="connectBtn" class="btn">
+                <i class="fas fa-wallet"></i>
+                Connect MetaMask
+            </button>
+        </div>
+        
+        <div id="walletConnected" class="wallet-info hidden">
+            <h4><i class="fas fa-check-circle"></i> Wallet Connected</h4>
+            <div class="wallet-address" id="walletAddress"></div>
+            <button id="viewBalanceBtn" class="btn" style="margin-top: 16px;">
+                <i class="fas fa-chart-line"></i>
+                View My Balances
+            </button>
+        </div>
+        
+        <div id="balanceInfo" class="balance-info hidden">
+            <h4><i class="fas fa-wallet"></i> Your Balances</h4>
+            <div class="balance-item">
+                <span class="balance-label">ZAPPKA Tokens:</span>
+                <span class="balance-value" id="tokenBalance">Loading...</span>
+            </div>
+            <div class="balance-item">
+                <span class="balance-label">Total Zapps Redeemed:</span>
+                <span class="balance-value" id="zappBalance">Loading...</span>
+            </div>
+        </div>
+        
+        <div id="generateZapp" class="step hidden">
+            <div class="step-title">
+                <span class="step-number">2</span>
+                Generate Zapp Code
+            </div>
+            <div class="step-description">
+                Get a unique code to include in your Zappka payment.
+            </div>
+            <button id="generateBtn" class="btn">
+                <i class="fas fa-qrcode"></i>
+                Generate Zapp Code
+            </button>
+        </div>
+        
+        <div id="zappInstructions" class="instructions hidden">
+            <h4><i class="fas fa-mobile-alt"></i> How to Send Zapps:</h4>
+            <ol>
+                <li>Open the Zappka app on your phone</li>
+                <li>Go to "Przelewy i historia żappsów" (Transfers and Zapps history)</li>
+                <li>Tap "Wyślij przelew" (Send transfer)</li>
+                <li>Send any amount to: <div class="zappka-account" id="zappkaAccount">Loading...</div></li>
+                <li>Include this code in the description: <div class="zapp-code" id="zappCode"></div></li>
+                <li>Complete the payment and return here</li>
+            </ol>
+        </div>
+        
+        <div id="verifyZapp" class="step hidden">
+            <div class="step-title">
+                <span class="step-number">3</span>
+                Verify Your Payment
+            </div>
+            <div class="step-description">
+                Enter the amount you sent and verify your payment.
+            </div>
+            <div class="form-group">
+                <label for="zappAmount">Amount sent (Zapps):</label>
+                <input type="number" id="zappAmount" placeholder="Enter amount" min="1">
+            </div>
+            <button id="verifyBtn" class="btn">
+                <i class="fas fa-check-circle"></i>
+                Verify Payment
+            </button>
+        </div>
+        
+        <div id="redeemTokens" class="step hidden">
+            <div class="step-title">
+                <span class="step-number">4</span>
+                Redeem ZAPPKA Tokens
+            </div>
+            <div class="step-description">
+                Your payment is verified! Now redeem your ZAPPKA tokens.
+            </div>
+            <div class="form-group">
+                <label>You will receive:</label>
+                <div class="zapp-code" id="tokenAmount">0 ZAPPKA</div>
+            </div>
+            <button id="redeemBtn" class="btn">
+                <i class="fas fa-gift"></i>
+                Redeem Tokens
+            </button>
+        </div>
+        
+        <div id="status" class="status hidden"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : 'https://your-backend.vercel.app/api';
+        
+        let provider, signer, userAddress, currentSession, contractInfo;
+        let currentStep = 0;
+        const totalSteps = 4;
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('connectBtn').addEventListener('click', connectWallet);
+            document.getElementById('viewBalanceBtn').addEventListener('click', viewBalances);
+            document.getElementById('generateBtn').addEventListener('click', generateZappCode);
+            document.getElementById('verifyBtn').addEventListener('click', verifyPayment);
+            document.getElementById('redeemBtn').addEventListener('click', redeemTokens);
+            
+            // Load contract info
+            loadContractInfo();
+        });
+        
+        function updateProgress(step) {
+            const progress = (step / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        async function loadContractInfo() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contract-info`);
+                contractInfo = await response.json();
+                document.getElementById('zappkaAccount').textContent = contractInfo.zappkaAccount;
+            } catch (error) {
+                console.error('Failed to load contract info:', error);
+            }
+        }
+        
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    showStatus('Please install MetaMask to use this app', 'error');
+                    return;
+                }
+                
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                userAddress = await signer.getAddress();
+                
+                document.getElementById('walletAddress').textContent = userAddress;
+                document.getElementById('connectWallet').classList.add('hidden');
+                document.getElementById('walletConnected').classList.remove('hidden');
+                document.getElementById('generateZapp').classList.remove('hidden');
+                
+                currentStep = 1;
+                updateProgress(currentStep);
+                
+                showStatus('Wallet connected successfully!', 'success');
+            } catch (error) {
+                showStatus('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+        
+        async function viewBalances() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user-history/${userAddress}`);
+                const data = await response.json();
+                
+                document.getElementById('tokenBalance').textContent = 
+                    (parseFloat(data.balances.tokenBalance) / 1e18).toFixed(4) + ' ZAPPKA';
+                document.getElementById('zappBalance').textContent = 
+                    data.balances.totalRedeemed + ' Zapps';
+                
+                document.getElementById('balanceInfo').classList.remove('hidden');
+                showStatus('Balances loaded successfully!', 'success');
+            } catch (error) {
+                showStatus('Failed to load balances: ' + error.message, 'error');
+            }
+        }
+        
+        async function generateZappCode() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/generate-zapp-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userAddress })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                    return;
+                }
+                
+                currentSession = data.sessionId;
+                document.getElementById('zappCode').textContent = data.zappCode;
+                
+                document.getElementById('generateZapp').classList.add('hidden');
+                document.getElementById('zappInstructions').classList.remove('hidden');
+                document.getElementById('verifyZapp').classList.remove('hidden');
+                
+                currentStep = 2;
+                updateProgress(currentStep);
+                
+                showStatus('Zapp code generated! Follow the instructions to send payment.', 'info');
+            } catch (error) {
+                showStatus('Failed to generate Zapp code: ' + error.message, 'error');
+            }
+        }
+        
+        async function verifyPayment() {
+            const zappAmount = document.getElementById('zappAmount').value;
+            
+            if (!zappAmount || zappAmount <= 0) {
+                showStatus('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/verify-zapp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sessionId: currentSession, 
+                        zappAmount: parseInt(zappAmount) 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showStatus(data.error || 'Verification failed', 'error');
+                    return;
+                }
+                
+                const tokenAmount = (parseFloat(data.tokenAmount) / 1e18).toFixed(4);
+                document.getElementById('tokenAmount').textContent = `${tokenAmount} ZAPPKA`;
+                
+                // Store data for redemption
+                window.currentRedemptionData = data;
+                
+                document.getElementById('verifyZapp').classList.add('hidden');
+                document.getElementById('redeemTokens').classList.remove('hidden');
+                
+                currentStep = 3;
+                updateProgress(currentStep);
+                
+                showStatus('Payment verified! You can now redeem your tokens.', 'success');
+            } catch (error) {
+                showStatus('Failed to verify payment: ' + error.message, 'error');
+            }
+        }
+        
+        async function redeemTokens() {
+            try {
+                if (!window.currentRedemptionData) {
+                    showStatus('No redemption data found', 'error');
+                    return;
+                }
+                
+                const { signature, zappCode, zappAmount } = window.currentRedemptionData;
+                
+                const response = await fetch(`${API_BASE_URL}/redeem-tokens`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentSession,
+                        signature,
+                        zappCode,
+                        zappAmount
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showStatus(data.error || 'Redemption failed', 'error');
+                    return;
+                }
+                
+                currentStep = 4;
+                updateProgress(currentStep);
+                
+                showStatus(`Tokens redeemed successfully! TX: ${data.txHash}`, 'success');
+                
+                // Reset the flow after 5 seconds
+                setTimeout(() => {
+                    location.reload();
+                }, 5000);
+            } catch (error) {
+                showStatus('Failed to redeem tokens: ' + error.message, 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            const icon = type === 'success' ? 'fas fa-check-circle' : 
+                        type === 'error' ? 'fas fa-exclamation-circle' : 
+                        'fas fa-info-circle';
+            
+            statusDiv.innerHTML = `<i class="${icon}"></i> ${message}`;
+            statusDiv.className = `status ${type}`;
+            statusDiv.classList.remove('hidden');
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

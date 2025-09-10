@@ -1,0 +1,49 @@
+{
+  "name": "zappka-zappka-converter",
+  "version": "1.0.0",
+  "description": "Convert Zappka Zapps to ZAPPKA crypto tokens - A beautiful, professional system",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "cd foundry-project && forge build",
+    "deploy": "cd foundry-project && forge script script/Deploy.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast",
+    "deploy-sepolia": "cd foundry-project && forge script script/Deploy.s.sol --rpc-url https://sepolia.infura.io/v3/$INFURA_KEY --private-key $PRIVATE_KEY --broadcast --verify"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "ethers": "^5.7.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "express-rate-limit": "^7.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "zappka",
+    "zapps",
+    "crypto",
+    "tokens",
+    "ethereum",
+    "defi",
+    "poland",
+    "loyalty",
+    "converter"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/zappka-zappka-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/zappka-zappka-converter/issues"
+  },
+  "homepage": "https://github.com/yourusername/zappka-zappka-converter#readme"
+}
